@@ -27,8 +27,8 @@
     --radius: 10px;
     /* The board stretches to the window; these are the narrowest the columns get before it scrolls. */
     --col-min: 78px;
-    --name-min: 130px;
-    --gap: 5px;
+    --name-min: 124px;
+    --gap: 4px;
     color-scheme: light; /* always the tan look, even when the computer is in dark mode */
   }
   * { box-sizing: border-box; }
@@ -116,7 +116,7 @@
 
   /* Badge (initials instead of photos) */
   .badge {
-    flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+    flex: none; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
     color: #fff; font-weight: 700; font-size: 13px; letter-spacing: .3px;
   }
 
@@ -131,7 +131,7 @@
   /* Board */
   .board-wrap { margin: 18px 0 0; overflow-x: auto; padding-bottom: 6px; }
   .board {
-    display: grid; gap: var(--gap); width: 100%;
+    display: grid; gap: var(--gap); width: 100%; max-width: 1260px; margin: 0 auto; /* boxes stop growing on wide screens */
     min-width: calc(var(--name-min) + 13 * var(--col-min) + 13 * var(--gap));
   }
   .row { display: grid; grid-template-columns: minmax(var(--name-min), 1.4fr) repeat(13, minmax(var(--col-min), 1fr)); gap: var(--gap); }
@@ -141,11 +141,12 @@
     cursor: help;
   }
   .cell {
-    min-height: 64px; border-radius: 8px; padding: 6px 4px; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; text-align: center; font-size: 12px; line-height: 1.25;
+    min-height: 54px; border-radius: 7px; padding: 5px 4px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; font-size: 11.5px; line-height: 1.22;
     font-weight: 600; overflow-wrap: break-word; hyphens: auto; color: var(--on-state); position: relative;
   }
   .cell > span { max-width: 100%; min-width: 0; } /* lets long words hyphenate instead of spilling out */
+  .cell.col-haki { font-size: 10.5px; } /* keeps "Observation," and "Conqueror's" on one line */
   .cell[data-symbol]::after {
     content: attr(data-symbol); position: absolute; top: 3px; right: 5px; font-size: 10px; opacity: .8;
   }
@@ -158,7 +159,7 @@
   .cell.partial { background: var(--partial); color: var(--on-partial); }
   .cell.miss { background: var(--miss); }
   .cell.unknown { background: var(--unknown); }
-  .cell .arrow { font-size: 20px; line-height: 1; margin-top: 2px; }
+  .cell .arrow { font-size: 17px; line-height: 1; margin-top: 1px; }
   /* Timings come from game.js (FLIP_MS, FLIP_STAGGER_MS) so the win panel waits for the last cell. */
   .row.new .cell:not(.name) {
     animation: flip var(--flip-ms, 850ms) ease both;
@@ -185,6 +186,12 @@
   .stats span { font-size: 12px; color: var(--muted); }
 
   .rules { max-width: 900px; margin: 16px auto 0; padding: 10px 16px; font-size: 14px; }
+  .arcs h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 14px 0 6px; }
+  .arcs .note { margin: 0 0 6px; }
+  .arc-columns { columns: 3 240px; column-gap: 28px; padding-left: 26px; margin: 0; }
+  .arc-columns li { break-inside: avoid; margin: 3px 0; }
+  .arc-columns li span:first-child { font-weight: 600; }
+  .arc-columns .chapters { color: var(--muted); margin-left: 6px; font-size: 13px; white-space: nowrap; }
   .rules summary { cursor: pointer; font-weight: 600; }
   .rules ul { padding-left: 18px; margin: 10px 0; }
   .rules li { margin: 4px 0; }
@@ -194,11 +201,12 @@
   footer a { color: inherit; }
 
   @media (max-width: 640px) {
-    :root { --col-min: 80px; --name-min: 120px; }
+    :root { --col-min: 76px; --name-min: 112px; }
     .hints { gap: 6px; }
     .hint { padding: 8px 6px; min-height: 66px; }
     .hint .value { font-size: 13px; }
-    .cell { font-size: 11.5px; min-height: 60px; padding: 5px 3px; }
+    .cell { font-size: 11px; min-height: 52px; padding: 4px 3px; }
+    .cell.col-haki { font-size: 10px; }
     .cell.name .badge { display: none; }
   }
 </style>
@@ -235,6 +243,11 @@
       <span>↑ secret is higher / later</span>
       <span>↓ secret is lower / earlier</span>
     </div>
+
+    <details class="rules panel arcs">
+      <summary>Arc order</summary>
+      <div id="arc-list"></div>
+    </details>
 
     <details class="rules panel">
       <summary>How the clues work</summary>

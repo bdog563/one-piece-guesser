@@ -439,7 +439,7 @@
       const row = el("div", { class: animate ? "row new" : "row", role: "row" },
         el("div", { class: "cell name", role: "cell" }, badge(guess), el("span", {}, guess.name)),
         results.map((r, i) => el("div", {
-          class: `cell ${r.state}`, role: "cell", style: `--i:${i}`, "data-symbol": STATE_SYMBOLS[r.state],
+          class: `cell ${r.state} col-${r.key}`, role: "cell", style: `--i:${i}`, "data-symbol": STATE_SYMBOLS[r.state],
           "aria-label": `${COLUMNS[i].label}: ${r.text}, ${STATE_WORDS[r.state]}${r.arrow ? ARROW_WORDS[r.arrow] : ""}`,
         }, el("span", {}, r.text), r.arrow ? el("span", { class: "arrow", "aria-hidden": "true" }, r.arrow === "up" ? "↑" : "↓") : null)));
       board.firstChild.after(row); // newest guess on top, under the header
@@ -629,6 +629,25 @@
     }
 
     renderRules();
+    renderArcList();
+
+    /** "Arc order" dropdown: story arcs, then cover stories, with their chapters. */
+    function renderArcList() {
+      const list = $("arc-list");
+      if (!list) return;
+      const chapters = (start, end) => (end === null ? `ch. ${start}+` : start === end ? `ch. ${start}` : `ch. ${start}–${end}`);
+      const item = (name, detail) => el("li", {}, el("span", {}, name), el("span", { class: "chapters" }, detail));
+      list.replaceChildren(
+        el("h3", {}, "Story arcs"),
+        el("ol", { class: "arc-columns" },
+          item("Chapter 0", "ch. 0 (special)"),
+          (global.ARCS || []).map((arc) => item(formatArc(arc.name), chapters(arc.start, arc.end)))),
+        el("h3", {}, "Cover stories"),
+        el("p", { class: "note" }, "Told on chapter cover pages alongside the main story. Characters introduced in one show it as their First Appearance."),
+        el("ol", { class: "arc-columns" },
+          (global.COVER_STORIES || []).map((story) =>
+            item(story.name, story.runs.map(([start, end]) => chapters(start, end)).join(", ")))));
+    }
 
     // Default round handling; the unlimited-mode section below replaces these hooks.
     const api = {
